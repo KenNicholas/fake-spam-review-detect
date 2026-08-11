@@ -75,7 +75,6 @@ def preprocessing(statement):
     tokens = [token for token in tokens if token.isalpha() and len(token) > 2]
     return ' '.join(tokens)
 
-# FUNGSI BARU: Menganalisis banyak teks sekaligus (Batch Processing)
 def analyze_bulk(texts: list, mode: str, model_type: str):
     if mode not in ["fake_review", "spam"]: return {"error": "Mode invalid."}
     if not texts: return []
