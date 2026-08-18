@@ -181,10 +181,10 @@ function App() {
                     onChange={(e) => setModelFake(e.target.value)}
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-blue-500 outline-none"
                   >
+                    <option value="lstm">🧠 Deep Learning: LSTM</option>
                     <option value="lr">📈 Logistic Regression</option>
                     <option value="rf">🌲 Random Forest</option>
                     <option value="xgb">🚀 XGBoost</option>
-                    <option value="lstm">🧠 Deep Learning: LSTM</option>
                   </select>
                   {renderMetrics(MODEL_METRICS.fake_review[modelFake])}
                 </div>
@@ -287,10 +287,10 @@ function App() {
                     <ShieldCheck size={16} className="text-blue-400"/> Fake Review Engine
                   </label>
                   <select value={modelFake} onChange={(e) => setModelFake(e.target.value)} className="w-full bg-slate-800 border border-slate-700 outline-none rounded-lg p-2 text-sm text-slate-200">
+                    <option value="lstm">🧠 Deep Learning: LSTM</option>
                     <option value="lr">📈 Logistic Regression</option>
                     <option value="rf">🌲 Random Forest</option>
                     <option value="xgb">🚀 XGBoost</option>
-                    <option value="lstm">🧠 Deep Learning: LSTM</option>
                   </select>
                   {renderMetrics(MODEL_METRICS.fake_review[modelFake])}
                 </div>
