@@ -26,7 +26,7 @@ function App() {
   const [inputText, setInputText] = useState('');
   const [file, setFile] = useState(null);
   
-  const [modelFake, setModelFake] = useState('lr'); 
+  const [modelFake, setModelFake] = useState('lstm'); 
   const [modelSpam, setModelSpam] = useState('lstm'); 
   
   const [loading, setLoading] = useState(false);
@@ -313,12 +313,12 @@ function App() {
                 onClick={handleFileAnalyze}
                 disabled={loading || !file}
                 className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl text-lg shadow-lg transition-all"
-              >
+             >
                 {loading ? 'Processing Document...' : 'Run Batch Analysis'}
-              </button>
+             </button>
 
-              {/* Bulk Results Table */}
-              {bulkResults.length > 0 && (
+             {/* Bulk Results Table */}
+             {bulkResults.length > 0 && (
                 <div className="mt-8 border-t border-slate-700 pt-6 animate-fade-in">
                   <h3 className="text-xl font-bold text-white mb-3">Results ({bulkResults.length} items)</h3>
                   <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
@@ -358,8 +358,8 @@ function App() {
                     ))}
                   </div>
                 </div>
-              )}
-          </div>
+             )}
+         </div>
         )}
       </div>
     </div>
