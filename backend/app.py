@@ -11,10 +11,27 @@ import pickle
 from nltk.tokenize import word_tokenize
 from io import StringIO
 import os
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
+
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+import tensorflow as tf
+
+def make_safe_layer(layer_class):
+    class SafeLayer(layer_class):
+        def __init__(self, **kwargs):
+            kwargs.pop('quantization_config', None)
+            super().__init__(**kwargs)
+    return SafeLayer
+
+safe_objects = {
+    'Embedding': make_safe_layer(tf.keras.layers.Embedding),
+    'Dense': make_safe_layer(tf.keras.layers.Dense),
+    'LSTM': make_safe_layer(tf.keras.layers.LSTM),
+    'Dropout': make_safe_layer(tf.keras.layers.Dropout),
+    'SpatialDropout1D': make_safe_layer(tf.keras.layers.SpatialDropout1D),
+    'Bidirectional': make_safe_layer(tf.keras.layers.Bidirectional)
+}
 
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
@@ -41,7 +58,7 @@ def load_pkl(path):
 def load_keras(path):
     try: 
         print(f"Mencoba load model Keras: {path}")
-        return load_model(path)
+        return load_model(path, custom_objects=safe_objects)
     except Exception as e: 
         print(f"❌ ERROR KERAS ({path}): {str(e)}")
         return None
@@ -94,7 +111,6 @@ def analyze_bulk(texts: list, mode: str, model_type: str):
             
         seqs = tokenizer.texts_to_sequences(clean_texts)
         padded = pad_sequences(seqs, maxlen=100, padding='post', truncating='post')
-        # Prediksi sekaligus dalam satu tarikan
         predictions = lstm_model.predict(padded, batch_size=32, verbose=0).flatten()
         scores = [float(p) * 100 for p in predictions]
         
@@ -144,7 +160,6 @@ class TextRequest(BaseModel):
 
 @app.post("/api/analyze/text")
 def analyze_single(req: TextRequest):
-    # Memanfaatkan fungsi bulk untuk 1 teks
     result = analyze_bulk([req.text], req.mode, req.model_type)
     if isinstance(result, dict) and "error" in result:
         raise HTTPException(status_code=500, detail=result["error"])
