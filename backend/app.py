@@ -39,8 +39,12 @@ def load_pkl(path):
     except: return None
 
 def load_keras(path):
-    try: return load_model(path)
-    except: return None
+    try: 
+        print(f"Mencoba load model Keras: {path}")
+        return load_model(path)
+    except Exception as e: 
+        print(f"❌ ERROR KERAS ({path}): {str(e)}")
+        return None
 
 def load_tokenizer(path):
     try:
@@ -102,7 +106,6 @@ def analyze_bulk(texts: list, mode: str, model_type: str):
             return {"error": f"File model {model_type} untuk {mode} tidak ditemukan."}
             
         vec_texts = tfidf.transform(clean_texts)
-        # Prediksi sekaligus dalam satu tarikan
         probas = clf_model.predict_proba(vec_texts)
         scores = [float(p[1]) * 100 for p in probas]
     else:
@@ -164,7 +167,6 @@ async def analyze_file(mode: str = Form(...), model_type: str = Form(...), file:
         text_col = next((col for col in ['text', 'review', 'v2', 'text_'] if col in df.columns), df.columns[0])
         texts = df[text_col].dropna().astype(str).tolist()
             
-    # Seluruh teks dikirim langsung ke fungsi bulk
     results = analyze_bulk(texts, mode, model_type)
     if isinstance(results, dict) and "error" in results:
         raise HTTPException(status_code=500, detail=results["error"])
