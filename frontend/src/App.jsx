@@ -221,7 +221,7 @@ function App() {
                 </div>
               </div>
 
-              {/* ACTION BUTTONS (Analyze & Clear) */}
+              {/* ACTION BUTTONS */}
               <div className="flex gap-4 mt-6">
                 <button 
                   onClick={handleTextAnalyze}
@@ -233,7 +233,7 @@ function App() {
                 <button 
                   onClick={handleClearText}
                   disabled={loading || (!inputText && !result)}
-                  className="px-8 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-slate-200 font-bold py-3 rounded-xl text-lg transition-all active:scale-[0.99]"
+                  className="px-8 bg-red-700 hover:bg-slate-600 disabled:opacity-50 text-slate-200 font-bold py-3 rounded-xl text-lg transition-all active:scale-[0.99]"
                 >
                   Clear
                 </button>
@@ -341,7 +341,7 @@ function App() {
                <button 
                   onClick={handleClearFile}
                   disabled={loading || (!file && bulkResults.length === 0)}
-                  className="px-8 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-slate-200 font-bold py-3 rounded-xl text-lg transition-all active:scale-[0.99]"
+                  className="px-8 bg-red-700 hover:bg-slate-600 disabled:opacity-50 text-slate-200 font-bold py-3 rounded-xl text-lg transition-all active:scale-[0.99]"
                >
                   Clear
                </button>
