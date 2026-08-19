@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { UploadCloud, CheckCircle, AlertTriangle, FileText, ShieldCheck, MailWarning } from 'lucide-react';
 
@@ -25,6 +25,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('manual'); 
   const [inputText, setInputText] = useState('');
   const [file, setFile] = useState(null);
+  const fileInputRef = useRef(null); // Tambahan ref untuk mereset input file
   
   const [modelFake, setModelFake] = useState('lstm'); 
   const [modelSpam, setModelSpam] = useState('lstm'); 
@@ -83,6 +84,20 @@ function App() {
       alert("Error processing file: " + (err.response?.data?.detail || err.message));
     } finally {
       setLoading(false);
+    }
+  };
+
+  // --- FUNGSI CLEAR BARU ---
+  const handleClearText = () => {
+    setInputText('');
+    setResult(null);
+  };
+
+  const handleClearFile = () => {
+    setFile(null);
+    setBulkResults([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''; // Mereset file yang dipilih di DOM
     }
   };
 
@@ -156,7 +171,6 @@ function App() {
         {/* TAB: INPUT MANUAL */}
         {activeTab === 'manual' && (
           <div className="animate-fade-in">
-            {/* INPUT BOX */}
             <div className="bg-slate-800 p-5 md:p-6 rounded-2xl border border-slate-700 shadow-2xl">
               <label className="block text-lg font-bold text-slate-200 mb-2 flex items-center gap-2">
                 <FileText className="text-teal-400" size={20}/> Your text:
@@ -166,10 +180,9 @@ function App() {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder="Paste the review, message, or email here..."
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-200 focus:outline-none focus:border-teal-500 text-lg shadow-inner"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-200 focus:outline-none focus:border-teal-500 text-lg shadow-inner custom-scrollbar"
               ></textarea>
 
-              {/* MODEL CONFIGURATION  */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5 border-t border-slate-700 pt-5">
                 {/* Fake Review Config */}
                 <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
@@ -179,7 +192,7 @@ function App() {
                   <select 
                     value={modelFake}
                     onChange={(e) => setModelFake(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-blue-500 outline-none"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-blue-500 outline-none cursor-pointer"
                   >
                     <option value="lstm">🧠 Deep Learning: LSTM</option>
                     <option value="lr">📈 Logistic Regression</option>
@@ -197,7 +210,7 @@ function App() {
                   <select 
                     value={modelSpam}
                     onChange={(e) => setModelSpam(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-amber-500 outline-none"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-amber-500 outline-none cursor-pointer"
                   >
                     <option value="lstm">🧠 Deep Learning: LSTM</option>
                     <option value="lr">📈 Logistic Regression</option>
@@ -208,20 +221,28 @@ function App() {
                 </div>
               </div>
 
-              {/* ACTION BUTTON */}
-              <button 
-                onClick={handleTextAnalyze}
-                disabled={loading || !inputText}
-                className="w-full mt-6 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-500 hover:to-blue-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl text-lg shadow-lg shadow-blue-900/50 transition-all active:scale-[0.99]"
-              >
-                {loading ? 'Running AI Engines...' : 'Analyze Text'}
-              </button>
+              {/* ACTION BUTTONS (Analyze & Clear) */}
+              <div className="flex gap-4 mt-6">
+                <button 
+                  onClick={handleTextAnalyze}
+                  disabled={loading || !inputText}
+                  className="flex-1 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-500 hover:to-blue-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl text-lg shadow-lg shadow-blue-900/50 transition-all active:scale-[0.99]"
+                >
+                  {loading ? 'Running AI Engines...' : 'Analyze Text'}
+                </button>
+                <button 
+                  onClick={handleClearText}
+                  disabled={loading || (!inputText && !result)}
+                  className="px-8 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-slate-200 font-bold py-3 rounded-xl text-lg transition-all active:scale-[0.99]"
+                >
+                  Clear
+                </button>
+              </div>
             </div>
 
             {/* RESULTS AREA */}
             {result && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5 animate-fade-in">
-                {/* Fake Review Result */}
                 <div className="bg-slate-800 p-5 md:p-6 rounded-2xl border border-slate-700 shadow-xl">
                   <h3 className="font-bold text-slate-400 border-b border-slate-700 pb-2 mb-4 uppercase tracking-widest flex items-center gap-2">
                     <ShieldCheck size={18}/> Fake Review Report
@@ -239,7 +260,6 @@ function App() {
                   </div>
                 </div>
 
-                {/* Spam Result */}
                 <div className="bg-slate-800 p-5 md:p-6 rounded-2xl border border-slate-700 shadow-xl">
                   <h3 className="font-bold text-slate-400 border-b border-slate-700 pb-2 mb-4 uppercase tracking-widest flex items-center gap-2">
                     <MailWarning size={18}/> Spam Report
@@ -264,7 +284,6 @@ function App() {
         {/* CHOOSE FILE */}
         {activeTab === 'file' && (
           <div className="bg-slate-800 p-5 md:p-8 rounded-2xl border border-slate-700 shadow-2xl animate-fade-in">
-             
              <div className="mb-6">
                <h2 className="text-2xl font-bold text-white mb-1.5 flex items-center gap-2"><UploadCloud/> Batch Analysis (.csv / .txt)</h2>
                <p className="text-slate-400 text-sm">Upload a file to run both Fake Review and Spam detection models simultaneously across all rows.</p>
@@ -274,6 +293,7 @@ function App() {
              <div className="border-2 border-dashed border-slate-600 rounded-xl p-6 text-center bg-slate-900/50 hover:bg-slate-900 transition mb-6">
                 <input 
                   type="file" 
+                  ref={fileInputRef} // Menggunakan ref untuk bisa dikosongkan saat di-clear
                   accept=".csv,.txt"
                   onChange={(e) => setFile(e.target.files[0])}
                   className="block w-full text-slate-400 file:mr-4 file:py-2.5 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-teal-600 file:text-white hover:file:bg-teal-500 cursor-pointer"
@@ -286,7 +306,7 @@ function App() {
                   <label className="block text-sm font-bold text-slate-400 mb-2 flex items-center gap-2">
                     <ShieldCheck size={16} className="text-blue-400"/> Fake Review Engine
                   </label>
-                  <select value={modelFake} onChange={(e) => setModelFake(e.target.value)} className="w-full bg-slate-800 border border-slate-700 outline-none rounded-lg p-2 text-sm text-slate-200">
+                  <select value={modelFake} onChange={(e) => setModelFake(e.target.value)} className="w-full bg-slate-800 border border-slate-700 outline-none rounded-lg p-2 text-sm text-slate-200 cursor-pointer">
                     <option value="lstm">🧠 Deep Learning: LSTM</option>
                     <option value="lr">📈 Logistic Regression</option>
                     <option value="rf">🌲 Random Forest</option>
@@ -299,7 +319,7 @@ function App() {
                   <label className="block text-sm font-bold text-slate-400 mb-2 flex items-center gap-2">
                     <MailWarning size={16} className="text-amber-400"/> Spam Detection Engine
                   </label>
-                  <select value={modelSpam} onChange={(e) => setModelSpam(e.target.value)} className="w-full bg-slate-800 border border-slate-700 outline-none rounded-lg p-2 text-sm text-slate-200">
+                  <select value={modelSpam} onChange={(e) => setModelSpam(e.target.value)} className="w-full bg-slate-800 border border-slate-700 outline-none rounded-lg p-2 text-sm text-slate-200 cursor-pointer">
                     <option value="lstm">🧠 Deep Learning: LSTM</option>
                     <option value="lr">📈 Logistic Regression</option>
                     <option value="rf">🌲 Random Forest</option>
@@ -309,13 +329,23 @@ function App() {
                 </div>
              </div>
 
-             <button 
-                onClick={handleFileAnalyze}
-                disabled={loading || !file}
-                className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl text-lg shadow-lg transition-all"
-             >
-                {loading ? 'Processing Document...' : 'Run Batch Analysis'}
-             </button>
+             {/* ACTION BUTTONS (Analyze & Clear) */}
+             <div className="flex gap-4">
+               <button 
+                  onClick={handleFileAnalyze}
+                  disabled={loading || !file}
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl text-lg shadow-lg transition-all active:scale-[0.99]"
+               >
+                  {loading ? 'Processing Document...' : 'Run Batch Analysis'}
+               </button>
+               <button 
+                  onClick={handleClearFile}
+                  disabled={loading || (!file && bulkResults.length === 0)}
+                  className="px-8 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-slate-200 font-bold py-3 rounded-xl text-lg transition-all active:scale-[0.99]"
+               >
+                  Clear
+               </button>
+             </div>
 
              {/* Bulk Results Table */}
              {bulkResults.length > 0 && (
@@ -326,7 +356,6 @@ function App() {
                       <div key={idx} className="bg-slate-900 p-4 rounded-xl border border-slate-700 text-sm">
                         <p className="text-slate-300 italic mb-4 line-clamp-3">"{item.text}"</p>
                         <div className="grid grid-cols-2 gap-6 border-t border-slate-800 pt-3">
-                          {/* Fake Review Bar */}
                           <div>
                             <span className="text-[10px] text-slate-500 uppercase block mb-1">Fake Review</span>
                             <div className="flex justify-between items-end mb-1">
@@ -339,8 +368,6 @@ function App() {
                               <div className={`${item.fake.is_flagged ? 'bg-red-500' : 'bg-emerald-500'} h-1.5 rounded-full transition-all duration-1000`} style={{ width: `${item.fake.confidence}%` }}></div>
                             </div>
                           </div>
-
-                          {/* Spam Detection Bar */}
                           <div>
                             <span className="text-[10px] text-slate-500 uppercase block mb-1">Spam Detection</span>
                             <div className="flex justify-between items-end mb-1">
@@ -359,7 +386,7 @@ function App() {
                   </div>
                 </div>
              )}
-         </div>
+          </div>
         )}
       </div>
     </div>
